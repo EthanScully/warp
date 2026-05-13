@@ -1,14 +1,8 @@
 FROM --platform=$BUILDPLATFORM golang:latest AS build
 ARG TARGETPLATFORM
-FROM --platform=$TARGETPLATFORM debian:stable-slim
+FROM debian:stable-slim
 COPY entrypoint.sh /
-RUN apt update && apt install curl gpg dbus -y && \
-    curl -fsSL https://pkg.cloudflareclient.com/pubkey.gpg | \
-    gpg --yes --dearmor --output /usr/share/keyrings/cloudflare-warp-archive-keyring.gpg && \
-    echo "deb [signed-by=/usr/share/keyrings/cloudflare-warp-archive-keyring.gpg] https://pkg.cloudflareclient.com/ bookworm main" | \
-    tee /etc/apt/sources.list.d/cloudflare-client.list && \
-    apt update && \
-    apt install cloudflare-warp -y && \
-    apt clean && \
-    rm -rf /var/lib/apt/lists/*
+COPY install.sh /
+RUN bash /install.sh
+RUN rm /install.sh
 ENTRYPOINT ["bash", "/entrypoint.sh"]
